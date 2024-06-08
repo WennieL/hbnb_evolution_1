@@ -4,6 +4,7 @@ from datetime import datetime
 import uuid
 import re
 
+
 class User():
     """Representation of user """
 
@@ -24,7 +25,7 @@ class User():
         # Note that setattr will call the setters for these attribs
         if kwargs:
             for key, value in kwargs.items():
-                if key == "first_name" or key == "last_name" or key == "email" or key == "password":
+                if hasattr(self, key):
                     setattr(self, key, value)
 
     @property
@@ -38,7 +39,8 @@ class User():
 
         # ensure that the value is alphabets only
         # Note that this won't allow names like Obi-wan or Al'azif
-        is_valid_name = len(value.strip()) > 0 and re.search("^[a-zA-Z]+$", value)
+        is_valid_name = len(value.strip()) > 0 and re.search(
+            "^[a-zA-Z]+$", value)
         if is_valid_name:
             self.__first_name = value
         else:
@@ -55,7 +57,8 @@ class User():
 
         # ensure that the value is alphabets only
         # Note that this won't allow names like Obi-wan or Al'azif
-        is_valid_name = len(value.strip()) > 0 and re.search("^[a-zA-Z]+$", value)
+        is_valid_name = len(value.strip()) > 0 and re.search(
+            "^[a-zA-Z]+$", value)
         if is_valid_name:
             self.__last_name = value
         else:
@@ -71,7 +74,8 @@ class User():
         """Setter for private prop last_name"""
 
         # add a simple regex check for email format. Nothing too fancy.
-        is_valid_email = len(value.strip()) > 0 and re.search("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$", value)
+        is_valid_email = len(value.strip()) > 0 and re.search(
+            "^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$", value)
         if is_valid_email:
             self.__email = value
         else:
@@ -89,4 +93,5 @@ class User():
         if is_valid_password:
             self.__password = value
         else:
-            raise ValueError("Password is too short! Min 6 characters required.")
+            raise ValueError(
+                "Password is too short! Min 6 characters required.")

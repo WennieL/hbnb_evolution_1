@@ -7,7 +7,8 @@ from data import country_data
 
 
 class City():
-    """Representation of city """
+    """Representation of a city,
+     containing basic details such as name and associated country."""
 
     def __init__(self, *args, **kwargs):
         """ constructor """
@@ -58,3 +59,26 @@ class City():
             self.__country_id = value
         else:
             raise ValueError("Invalid country_id specified: {}".format(value))
+
+    # @classmethod
+    # def from_json(cls, data):
+    #     """Create a City object from JSON data."""
+    #     city_data = json.loads(data)
+    #     city_objects = []
+    #     for city_entry in city_data.get('City', []):
+    #         city = cls(id=city_entry.get('id'),
+    #                    country_id=city_entry.get('country_id'),
+    #                    name=city_entry.get('name'),
+    #                    created_at=city_entry.get('created_at'),
+    #                    updated_at=city_entry.get('updated_at'))
+    #         city_objects.append(city)
+    #     return city_objects
+
+    def update_city(self, **kwargs):
+        """update an existing city data"""
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+            else:
+                raise ValueError(f"Invalid item: {key}")
+        self.updated_at = datetime.now().timestamp()

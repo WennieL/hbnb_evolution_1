@@ -3,7 +3,7 @@
 from datetime import datetime
 import uuid
 import re
-from data import place_data, user_data, city_data, amenity_data, review_data
+from data import place_data, user_data, city_data, review_data, place_to_amenity_data
 
 
 class Place():
@@ -11,8 +11,6 @@ class Place():
 
     def __init__(self, **kwargs):
         """ constructor """
-
-        # defaults
         self.id = str(uuid.uuid4())
         self.created_at = datetime.now().timestamp()
         self.updated_at = self.created_at
@@ -21,49 +19,45 @@ class Place():
         self.__name = ""
         self.__description = ""
         self.__address = ""
-        self.__latitude = None
-        self.__longitude = None
-        self.__number_of_rooms = None
-        self.__bathrooms = None
-        self.__price_per_night = None
-        self.__max_guests = None
-        self.ameities = []
-        self.reviews = []
+        self.__latitude = 0.0
+        self.__longitude = 0.0
+        self.__number_of_rooms = 0
+        self.__bathrooms = 0
+        self.__price_per_night = 0
+        self.__max_guests = 0
 
-        if kwargs:
-            for key, value in kwargs.items():
-                if hasattr(self, key):
-                    setattr(self, key, value)
+        # Initialize instance attributes from kwargs if provided
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+            else:
+                raise ValueError(f"Invalid item: {key}")
 
     @property
     def host_user_id(self):
-        """Getter for private host user id"""
+        """pass"""
         return self.__host_user_id
 
     @host_user_id.setter
     def host_user_id(self, value):
-        """Setter for private host user id"""
-        # Foreign Key Validation:
-
-        if value in user_data:
+        """Setter for host user id"""
+        if isinstance(value, str):
             self.__host_user_id = value
         else:
-            raise ValueError(f"Invalid host_user_id specified: {value}")
+            raise ValueError(f"Invalid Host User ID: {value}")
 
     @property
     def city_id(self):
-        """Getter for private city id"""
+        """pass"""
         return self.__city_id
 
     @city_id.setter
     def city_id(self, value):
-        """Setter for private city id"""
-        # Foreign Key Validation:
-
-        if value in city_data:
+        """Setter for host user id"""
+        if isinstance(value, str):
             self.__city_id = value
         else:
-            raise ValueError(f"Invalid city_id specified: {value}")
+            raise ValueError(f"Invalid City ID: {value}")
 
     @property
     def name(self):
@@ -155,6 +149,19 @@ class Place():
             raise ValueError(f"Invalid number_of_rooms specified: {value}")
 
     @property
+    def bathrooms(self):
+        """Getter for private bathrooms"""
+        return self.__bathrooms
+
+    @bathrooms.setter
+    def bathrooms(self, value):
+        """Setter for private bathrooms"""
+        if isinstance(value, int) and value >= 0:
+            self.__bathrooms = value
+        else:
+            raise ValueError(f"Invalid bathrooms specified: {value}")
+
+    @property
     def price_per_night(self):
         """Getter for private price_per_night"""
         return self.__price_per_night
@@ -183,19 +190,3 @@ class Place():
         else:
             raise ValueError(
                 f"Invalid max_guests specified: {value}. Guest(s) must be a positive integer.")
-
-    @property
-    def bathrooms(self):
-        """Getter for private bathrooms"""
-        return self.__bathrooms
-
-    @bathrooms.setter
-    def bathrooms(self, value):
-        """Setter for private bathrooms"""
-        # ensure that the value is positive int or 0
-
-        if isinstance(value, int) and value >= 0:
-            self.__bathrooms = value
-        else:
-            raise ValueError(
-                f"Invalid bathrooms specified: {value}. Bathrooms must be a non-negative integer.")
