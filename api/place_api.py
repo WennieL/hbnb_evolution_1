@@ -3,7 +3,7 @@
 from flask import Blueprint, jsonify, request, abort
 from datetime import datetime
 
-# Import your models
+# Import models
 from models.user import User
 from models.review import Review
 from models.place import Place
@@ -11,7 +11,7 @@ from models.country import Country
 from models.city import City
 from models.amenity import Amenity
 
-# Import your data (if needed)
+# Import data
 from data import (
     country_data, place_data, amenity_data,
     place_to_amenity_data, review_data, user_data, city_data
@@ -19,3 +19,57 @@ from data import (
 
 
 place_blueprint = Blueprint('place_api', __name__)
+
+
+@place_blueprint.route('/example/places_amenties_raw')
+def example_places_amenities_raw():
+    """ Prints out the raw data for relationships between places and their amenities """
+    return jsonify(place_to_amenity_data)
+
+
+@place_blueprint.route('/example/places_amenties_prettified_example')
+def example_places_amenties_prettified():
+    """ Prints out the relationships between places and their amenities using names """
+
+    output = {}
+
+    for place_key in place_to_amenity_data:
+        place_name = place_data[place_key]['name']
+        if place_name not in output:
+            output[place_name] = []
+
+        amenities_ids = place_to_amenity_data[place_key]
+        for amenity_key in amenities_ids:
+            amenity_name = amenity_data[amenity_key]['name']
+            output[place_name].append(amenity_name)
+
+    return jsonify(output)
+
+
+@place_blueprint.route('/example/places_reviews')
+def example_places_reviews():
+    """ prints out reviews of places """
+
+    output = {}
+
+    for key in review_data:
+        row = review_data[key]
+        place_id = row['place_id']
+        place_name = place_data[place_id]['name']
+        if place_name not in output:
+            output[place_name] = []
+
+        reviewer = user_data[row['commentor_user_id']]
+
+        output[place_name].append({
+            "review": row['feedback'],
+            "rating": str(row['rating'] * 5) + " / 5",
+            "reviewer": reviewer['first_name'] + " " + reviewer['last_name']
+        })
+
+    return jsonify(output)
+
+# Consider adding other test routes to display data for:
+# - the places within the countries
+# - which places are owned by which users
+# - names of the owners of places with toilets

@@ -3,7 +3,7 @@
 from flask import Blueprint, jsonify, request, abort
 from datetime import datetime
 
-# Import your models
+# Import models
 from models.user import User
 from models.review import Review
 from models.place import Place
@@ -11,7 +11,7 @@ from models.country import Country
 from models.city import City
 from models.amenity import Amenity
 
-# Import your data (if needed)
+# Import data
 from data import (
     country_data, place_data, amenity_data,
     place_to_amenity_data, review_data, user_data, city_data
@@ -24,8 +24,6 @@ user_blueprint = Blueprint('user_api', __name__)
 @user_blueprint.route('/users', methods=["GET"])
 def users_get():
     """returns all Users"""
-    if not user_data:
-        abort(404, description="No user exist")
 
     users_info = []
     for user_key, user in user_data.items():
@@ -63,52 +61,61 @@ def users_specific_get(user_id):
 
 
 @user_blueprint.route('/users', methods=["POST"])
-def users_post():
-    """ posts data for new user then returns the user data"""
+def create_user():
+    """ pcreate a new user"""
     # -- Usage example --
     # curl -X POST [URL] /
     #    -H "Content-Type: application/json" /
     #    -d '{"key1":"value1","key2":"value2"}'
 
-    # print(request.content_type)
-
-    if request.get_json() is None:
+    if not request.json:
         abort(400, "Not a JSON")
 
+    # convert to python dict data type
     data = request.get_json()
-    if 'email' not in data:
-        abort(400, "Missing email")
-    if 'password' not in data:
-        abort(400, "Missing password")
+    required_fields = ["first_name", "last_name", "email", "password"]
+    for field in required_fields:
+        if field not in data:
+            abort(400, f"Missing '{field}' field")
 
     try:
-        u = User(first_name=data["first_name"], last_name=data["last_name"],
-                 email=data["email"], password=data["password"])
+        # use User class to create a new object and
+        # access method: dict
+        new_user = User(
+            first_name=data["first_name"],
+            last_name=data["last_name"],
+            email=data["email"],
+            password=data["password"]
+        )
     except ValueError as exc:
-        return repr(exc) + "\n"
+        abort(400, repr(exc))
 
+    # setdefault("User", []) provides a safety net
+    # by initializing "User" if absent
+    user_data.setdefault("User", [])
     # add new user data to user_data
     # note that the created_at and updated_at are using timestamps
-    user_data[u.id] = {
-        "id": u.id,
-        "first_name": u.first_name,
-        "last_name": u.last_name,
-        "email": u.email,
-        "created_at": u.created_at,
-        "updated_at": u.updated_at
-    }
+    # data stored -> server side
+    user_data["User"].append({
+        "id": new_user.id,
+        "first_name": new_user.first_name,
+        "last_name": new_user.last_name,
+        "email": new_user.email,
+        "created_at": new_user.created_at,
+        "updated_at": new_user.updated_at
+    })
 
-    # note that the created_at and updated_at are using readable datetimes
+    # Prepare attributes to return, response to API request -> client side
     attribs = {
-        "id": u.id,
-        "first_name": u.first_name,
-        "last_name": u.last_name,
-        "email": u.email,
-        "created_at": datetime.fromtimestamp(u.created_at),
-        "updated_at": datetime.fromtimestamp(u.updated_at)
+        "id": new_user.id,
+        "first_name": new_user.first_name,
+        "last_name": new_user.last_name,
+        "email": new_user.email,
+        "created_at": datetime.fromtimestamp(new_user.created_at),
+        "updated_at": datetime.fromtimestamp(new_user.updated_at)
     }
 
-    return jsonify(attribs)
+    return jsonify(attribs), 201
 
 
 @user_blueprint.route('/users/<user_id>', methods=["PUT"])
@@ -119,33 +126,63 @@ def users_put(user_id):
     #    -H "Content-Type: application/json" /
     #    -d '{"key1":"value1","key2":"value2"}'
 
-    if request.get_json() is None:
-        abort(400, "Not a JSON")
+    # Check if request contains JSON data
+    if not request.json:
+        abort(400, "Request must contain JSON data")
 
-    data = request.get_json()
+    # Get JSON data from request
+    new_data = request.json
 
+    # Check if user_id exists in user_data
     if user_id not in user_data:
-        abort(400, "User not found for id {}".format(user_id))
+        abort(404, f"User not found for id {user_id}")
 
-    u = user_data[user_id]
+    # Get the user dictionary from user_data
+    user = user_data[user_id]
 
-    # modify the values
-    for k, v in data.items():
-        # only first_name and last_name are allowed to be modified
-        if k in ["first_name", "last_name"]:
-            u[k] = v
+    # Update user's first_name and last_name if provided in JSON data
+    if 'first_name' in new_data:
+        user['first_name'] = new_data['first_name']
+    if 'last_name' in new_data:
+        user['last_name'] = new_data['last_name']
 
-    # update user_data with the new name - print user_data out to confirm it if you want
-    user_data[user_id] = u
+    # Update user_data with the modified user
+    user_data[user_id] = user
 
+    # Prepare response attributes with updated timestamps as datetime objects
     attribs = {
-        "id": u["id"],
-        "first_name": u["first_name"],
-        "last_name": u["last_name"],
-        "email": u["email"],
-        "created_at": datetime.fromtimestamp(u["created_at"]),
-        "updated_at": datetime.fromtimestamp(u["updated_at"])
+        "id": user["id"],
+        "first_name": user["first_name"],
+        "last_name": user["last_name"],
+        "email": user["email"],
+        "created_at": datetime.fromtimestamp(user["created_at"]),
+        "updated_at": datetime.fromtimestamp(user["updated_at"])
     }
 
-    # print out the updated user details
-    return jsonify(attribs)
+    # Return JSON response with updated user attributes
+    return jsonify(attribs), 200
+
+
+# @user_blueprint.route('/users/<user_id>', methods=["DELETE"])
+# def users_delete(user_id):
+#     """Deletes an existing user by user_id"""
+
+#     # Check if user_id exists in user_data
+#     if user_id not in user_data:
+#         abort(404, f"User not found: {user_id}")
+
+#     # Remove user from user_data
+#     deleted_user = user_data.pop(user_id)
+
+#     # Prepare response with details of deleted user
+#     attribs = {
+#         "id": deleted_user["id"],
+#         "first_name": deleted_user["first_name"],
+#         "last_name": deleted_user["last_name"],
+#         "email": deleted_user["email"],
+#         "created_at": datetime.fromtimestamp(deleted_user["created_at"]),
+#         "updated_at": datetime.fromtimestamp(deleted_user["updated_at"])
+#     }
+
+#     # Return JSON response with details of deleted user
+#     return jsonify(attribs), 200

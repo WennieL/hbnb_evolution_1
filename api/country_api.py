@@ -3,7 +3,7 @@
 from flask import Blueprint, jsonify, request, abort
 from datetime import datetime
 
-# Import your models
+# Import models
 from models.user import User
 from models.review import Review
 from models.place import Place
@@ -11,13 +11,20 @@ from models.country import Country
 from models.city import City
 from models.amenity import Amenity
 
-# Import your data (if needed)
+# Import data
 from data import (
     country_data, place_data, amenity_data,
     place_to_amenity_data, review_data, user_data, city_data
 )
 
 country_blueprint = Blueprint('country_api', __name__)
+
+
+# Examples
+@country_blueprint.route('/example/country_data')
+def example_country_data():
+    """ Example to show that we can view data loaded in the data module's init """
+    return jsonify(country_data)
 
 
 @country_blueprint.route('/api/v1/countries', methods=["POST"])
