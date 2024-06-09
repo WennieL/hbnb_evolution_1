@@ -16,4 +16,4 @@ I've decided instead to give everyone a good code base to start from so that you
 
 ## Directory Structure
 
-![directory structure](DS.png)
+![image](/hbnb_evolution_1/DS.png)
