@@ -14,23 +14,6 @@ I've decided instead to give everyone a good code base to start from so that you
 6. A working Dockerfile for Task 3 is in the docker folder. Look at it and understand what I tried to do. It is not perfect. Investigate how you can create a better Dockerfile without using the ubuntu image.
 
 
-##Directory Structure
+## Directory Structure
 
-project/
-├── app.py
-├── api/
-│   ├── __init__.py
-│   ├── user_api.py
-│   ├── country_api.py
-│   ├── city_api.py
-│   ├── amenity_api.py
-│   ├── place_api.py
-│   └── review_api.py
-└── models/
-    ├── __init__.py
-    ├── amenity.py
-    ├── city.py
-    ├── country.py
-    ├── place.py
-    ├── review.py
-    └── user.py
+![directory structure](image.png)
