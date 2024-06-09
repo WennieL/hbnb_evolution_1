@@ -16,4 +16,4 @@ I've decided instead to give everyone a good code base to start from so that you
 
 ## Directory Structure
 
-![directory structure](image.png)
+![directory structure](DS.png)
