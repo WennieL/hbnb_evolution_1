@@ -147,13 +147,6 @@ def update_user(user_id):
     else:
         abort(404, f"User ID not found: {user_id}")
 
-    # Check if user_id exists in user_data
-    # if user_id not in user_data:
-    #     abort(404, f"User not found for id: {user_id}")
-
-    # # Get the user dictionary from user_data
-    # user = user_data[user_id]
-
     # Update user's first_name and last_name if provided in JSON data
     if "first_name" in new_data:
         found_user_data["first_name"] = new_data["first_name"]
