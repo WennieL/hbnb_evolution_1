@@ -76,7 +76,7 @@ def create_user():
     required_fields = ["first_name", "last_name", "email", "password"]
     for field in required_fields:
         if field not in data:
-            abort(400, f"Missing '{field}' field")
+            abort(400, f"Missing data: {field}")
 
     try:
         # use User class to create a new object and
@@ -135,16 +135,16 @@ def users_put(user_id):
 
     # Check if user_id exists in user_data
     if user_id not in user_data:
-        abort(404, f"User not found for id {user_id}")
+        abort(404, f"User not found for id: {user_id}")
 
     # Get the user dictionary from user_data
     user = user_data[user_id]
 
     # Update user's first_name and last_name if provided in JSON data
-    if 'first_name' in new_data:
-        user['first_name'] = new_data['first_name']
-    if 'last_name' in new_data:
-        user['last_name'] = new_data['last_name']
+    if "first_name" in new_data:
+        user["first_name"] = new_data["first_name"]
+    if "last_name" in new_data:
+        user["last_name"] = new_data["last_name"]
 
     # Update user_data with the modified user
     user_data[user_id] = user

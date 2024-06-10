@@ -51,3 +51,26 @@ def example_cities():
     # This shows that the output of the City object's built-in __dict__ is not usable as-is
 
     return cities_list
+
+
+@city_blueprint.route('/api/v1/countries/<country_code>/cities', methods=["GET"])
+def countries_specific_cities_get(country_code):
+    """ returns cities data of specified country """
+    data = []
+    wanted_country_id = ""
+
+    for k, v in country_data.items():
+        if v['code'] == country_code:
+            wanted_country_id = v['id']
+
+    for k, v in city_data.items():
+        if v['country_id'] == wanted_country_id:
+            data.append({
+                "id": v['id'],
+                "name": v['name'],
+                "country_id": v['country_id'],
+                "created_at": datetime.fromtimestamp(v['created_at']),
+                "updated_at": datetime.fromtimestamp(v['updated_at'])
+            })
+
+    return jsonify(data)

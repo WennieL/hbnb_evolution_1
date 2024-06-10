@@ -43,7 +43,7 @@ class Country():
             self.__name = value
         else:
             raise ValueError(
-                "Invalid country name specified: {}".format(value))
+                f"Invalid country name specified: {value}")
 
     @property
     def code(self):
@@ -61,27 +61,4 @@ class Country():
             self.__code = value
         else:
             raise ValueError(
-                "Invalid country code specified: {}".format(value))
-
-    # @classmethod
-    # def from_json(cls, data):
-    #     """Create a list of Country objects from JSON data."""
-    #     country_data = json.loads(data)
-    #     country_objects = []
-    #     for country_entry in country_data.get('Country', []):
-    #         country = cls(id=country_entry.get('id'),
-    #                       name=country_entry.get('name'),
-    #                       code=country_entry.get('code'),
-    #                       created_at=country_entry.get('created_at'),
-    #                       updated_at=country_entry.get('updated_at'))
-    #         country_objects.append(country)
-    #     return country_objects
-
-    def update_country(self, **kwargs):
-        """update existing country data"""
-        for key, value in kwargs.items():
-            if hasattr(self, key):
-                setattr(self, key, value)
-            else:
-                raise ValueError(f"Invalid item: {key}")
-        self.updated_at = datetime.now().timestamp()
+                f"Invalid country code specified: {value}")
