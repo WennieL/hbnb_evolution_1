@@ -32,7 +32,7 @@ def countries_get():
     """ returns all countires data """
 
     countries_info = []
-    for country_key, country_value in country_data.items():
+    for country_value in country_data.values():
         countries_info.append({
             "id": country_value["id"],
             "name": country_value["name"],
@@ -47,7 +47,8 @@ def countries_get():
 @country_blueprint.route('/countries/<country_code>', methods=["GET"])
 def countries_specific_get(country_code):
     """ returns specific country data """
-    for country_key, country_value in country_data.items():
+
+    for country_value in country_data.values():
         if country_value['code'] == country_code:
             data = country_value
 
@@ -63,7 +64,7 @@ def countries_specific_get(country_code):
 
 
 @country_blueprint.route('/countries', methods=["POST"])
-def countries_post():
+def create_new_country():
     """ posts data for new country then returns the country data"""
     # -- Usage example --
     # curl -X POST [URL] /
@@ -73,15 +74,14 @@ def countries_post():
         abort(400, "Not a JSON")
 
     data = request.get_json()
-    country_list = data.get('Country')
+    country_list = data.get("Country")
 
     for data in country_list:
-        # Check for required fields in each country data
+       # Check for required fields in each country data
         required_fields = ["name", "code"]
         for field in required_fields:
             if field not in data:
                 abort(400, f"Missing data: {field}")
-
         try:
             new_country = Country(
                 name=data["name"],
@@ -99,7 +99,6 @@ def countries_post():
             "created_at": new_country.created_at,
             "updated_at": new_country.updated_at
         })
-
         attribs = {
             "id": new_country.id,
             "name": new_country.name,
@@ -107,12 +106,11 @@ def countries_post():
             "created_at": datetime.fromtimestamp(new_country.created_at),
             "updated_at": datetime.fromtimestamp(new_country.updated_at)
         }
-
     return jsonify(attribs), 201
 
 
 @country_blueprint.route('/countries/<country_code>', methods=["PUT"])
-def countries_put(country_code):
+def update_country(country_code):
     """ updates existing user data using specified id """
     # -- Usage example --
     # curl -X PUT [URL] /
@@ -124,8 +122,7 @@ def countries_put(country_code):
     new_data = request.get_json()
 
     # Search for the country with the specified country_code
-
-    for country_key, country_value in country_data.items():
+    for country_value in country_data.values():
         if country_value["code"] == country_code:
             found_country_data = country_value
             break
@@ -148,3 +145,26 @@ def countries_put(country_code):
     }
 
     return jsonify(attribs), 200
+
+
+@country_blueprint.route('/countries/<country_code>', methods=["DELETE"])
+def delete_country(country_code):
+    """Deletes an existing user by user_id"""
+
+    # Check if user_id exists in user_data
+    for country_value in country_data.values():
+        if country_value["code"] == country_code:
+            delete_data = country_value
+            break
+    else:
+        abort(404, f"Country not found: {country_code}")
+
+    country_info = {
+        "id": delete_data["id"],
+        "code": delete_data["code"],
+        "name": delete_data["name"],
+        "created_at": datetime.fromtimestamp(delete_data["created_at"]),
+        "updated_at": datetime.fromtimestamp(delete_data["updated_at"])
+    }
+
+    return jsonify(country_info), 200

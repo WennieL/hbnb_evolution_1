@@ -53,7 +53,7 @@ def example_cities():
     return cities_list
 
 
-@city_blueprint.route('/api/v1/countries/<country_code>/cities', methods=["GET"])
+@city_blueprint.route('/countries/<country_code>/cities', methods=["GET"])
 def countries_specific_cities_get(country_code):
     """ returns cities data of specified country """
     data = []
