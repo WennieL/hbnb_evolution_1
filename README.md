@@ -13,7 +13,6 @@ I've decided instead to give everyone a good code base to start from so that you
 5. Note that while you can load data from the JSON files, you can't update and save to them. Perhaps you all might want to do something about this missing feature?
 6. A working Dockerfile for Task 3 is in the docker folder. Look at it and understand what I tried to do. It is not perfect. Investigate how you can create a better Dockerfile without using the ubuntu image.
 
-
 ## Directory Structure
 
 ![image](/hbnb_evolution_1/DS.png)

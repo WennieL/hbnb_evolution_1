@@ -46,29 +46,6 @@ def example_places_amenties_prettified():
     return jsonify(output)
 
 
-@place_blueprint.route('/example/places_reviews')
-def example_places_reviews():
-    """ prints out reviews of places """
-
-    output = {}
-
-    for key in review_data:
-        row = review_data[key]
-        place_id = row['place_id']
-        place_name = place_data[place_id]['name']
-        if place_name not in output:
-            output[place_name] = []
-
-        reviewer = user_data[row['commentor_user_id']]
-
-        output[place_name].append({
-            "review": row['feedback'],
-            "rating": str(row['rating'] * 5) + " / 5",
-            "reviewer": reviewer['first_name'] + " " + reviewer['last_name']
-        })
-
-    return jsonify(output)
-
 # Consider adding other test routes to display data for:
 # - the places within the countries
 # - which places are owned by which users

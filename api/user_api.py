@@ -23,12 +23,13 @@ user_blueprint = Blueprint('user_api', __name__)
 
 @user_blueprint.route('/users', methods=["GET"])
 def users_get():
-    """returns all Users"""
-
+    """return all Users"""
     users_info = []
+
     for user_value in user_data.values():
+        user_id = user_value["id"]
         users_info.append({
-            "id": user_value['id'],
+            "id": user_id,
             "first_name": user_value['first_name'],
             "last_name": user_value['last_name'],
             "email": user_value['email'],
@@ -49,7 +50,7 @@ def users_specific_get(user_id):
             data = user_value
             break
     else:
-        abort(404, description="User not found")
+        abort(404, f"User: {user_id} not found")
 
     user_info = {
         "id": data['id'],
@@ -66,7 +67,7 @@ def users_specific_get(user_id):
 
 @user_blueprint.route('/users', methods=["POST"])
 def create_new_user():
-    """ pcreate a new user"""
+    """create a new user"""
     # -- Usage example --
     # curl -X POST [URL] /
     #    -H "Content-Type: application/json" /
@@ -77,51 +78,45 @@ def create_new_user():
 
     # convert to python dict data type
     data = request.get_json()
-    user_list = data.get("User")
 
-    for data in user_list:
-        required_fields = ["first_name", "last_name", "email", "password"]
-        for field in required_fields:
-            if field not in data:
-                abort(400, f"Missing data: {field}")
-
-        try:
-            # use User class to create a new object and
-            # access method: dict
-            new_user = User(
-                first_name=data["first_name"],
-                last_name=data["last_name"],
-                email=data["email"],
-                password=data["password"]
-            )
-        except ValueError as exc:
-            abort(400, repr(exc))
-
-        # setdefault("User", []) provides a safety net
-        # by initializing "User" if absent
-        user_data.setdefault("User", [])
-        # add new user data to user_data
-        # note that the created_at and updated_at are using timestamps
-        # data stored -> server side
-        user_data["User"].append({
-            "id": new_user.id,
-            "first_name": new_user.first_name,
-            "last_name": new_user.last_name,
-            "email": new_user.email,
-            "created_at": new_user.created_at,
-            "updated_at": new_user.updated_at
-        })
-
-        # Prepare attributes to return, response to API request -> client side
-        attribs = {
-            "id": new_user.id,
-            "first_name": new_user.first_name,
-            "last_name": new_user.last_name,
-            "email": new_user.email,
-            "created_at": datetime.fromtimestamp(new_user.created_at),
-            "updated_at": datetime.fromtimestamp(new_user.updated_at)
-        }
-
+    required_fields = ["first_name", "last_name", "email", "password"]
+    for field in required_fields:
+        if field not in data:
+            abort(400, f"Missing data: {field}")
+    try:
+        # use User class to create a new object and
+        # access method: dict
+        new_user = User(
+            first_name=data["first_name"],
+            last_name=data["last_name"],
+            email=data["email"],
+            password=data["password"]
+        )
+    except ValueError as exc:
+        abort(400, repr(exc))
+    # setdefault("User", []) provides a safety net
+    # by initializing "User" if absent
+    user_data.setdefault("User", [])
+    # add new user data to user_data
+    # note that the created_at and updated_at are using timestamps
+    # data stored -> server side
+    user_data["User"].append({
+        "id": new_user.id,
+        "first_name": new_user.first_name,
+        "last_name": new_user.last_name,
+        "email": new_user.email,
+        "created_at": new_user.created_at,
+        "updated_at": new_user.updated_at
+    })
+    # Prepare attributes to return, response to API request -> client side
+    attribs = {
+        "id": new_user.id,
+        "first_name": new_user.first_name,
+        "last_name": new_user.last_name,
+        "email": new_user.email,
+        "created_at": datetime.fromtimestamp(new_user.created_at),
+        "updated_at": datetime.fromtimestamp(new_user.updated_at)
+    }
     return jsonify(attribs), 201
 
 
@@ -141,6 +136,7 @@ def update_user(user_id):
     new_data = request.get_json()
 
     for user_value in user_data.values():
+        # for user_value in user_data.get("User", []):
         if user_value["id"] == user_id:
             found_user_data = user_value
             break
