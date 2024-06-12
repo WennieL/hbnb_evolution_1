@@ -94,9 +94,10 @@ def create_new_user():
         )
     except ValueError as exc:
         abort(400, repr(exc))
-    # setdefault("User", []) provides a safety net
-    # by initializing "User" if absent
-    user_data.setdefault("User", [])
+
+    # Ensure the "User" key exists and is a list
+    if "User" not in user_data:
+        user_data["User"] = []
     # add new user data to user_data
     # note that the created_at and updated_at are using timestamps
     # data stored -> server side

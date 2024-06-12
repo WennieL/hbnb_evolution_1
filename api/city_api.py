@@ -21,8 +21,8 @@ from data import (
 city_blueprint = Blueprint('city_api', __name__)
 
 
-@city_blueprint.route('/example/cities')
-def example_cities():
+@city_blueprint.route('/cities')
+def get_cities():
     """ Example route to showing usage of the City model class """
 
     # We will be appending dictionaries to the list instead of City objects

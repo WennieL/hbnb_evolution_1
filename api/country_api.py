@@ -90,8 +90,9 @@ def create_new_country():
         except ValueError as exc:
             abort(400, repr(exc))
 
-        country_data.setdefault("Country", [])
-        # country_data.setdefault("Country", [])
+        if "Country" not in country_data:
+            country_data["Country"] = []
+
         country_data["Country"].append({
             "id": new_country.id,
             "name": new_country.name,
