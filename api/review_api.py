@@ -18,36 +18,10 @@ from data import (
 )
 
 
-review_blueprint = Blueprint('review_api', __name__)
+review_api = Blueprint('review_api', __name__)
 
 
-# @review_blueprint.route('/example/places_reviews')
-# def example_places_reviews():
-#     """ prints out reviews of places """
-#     # return jsonify(review_data)
-
-#     reviewer_data = {}
-
-#     for review_value in review_data.values():
-#         review_place_id = review_value["place_id"]
-#         place_name = place_data[review_place_id]["name"]
-#         commentor_id = review_value["commentor_user_id"]
-#         reviewer_first_name = user_data[commentor_id]["first_name"]
-#         reviewer_last_name = user_data[commentor_id]["last_name"]
-
-#         if place_name not in reviewer_data:
-#             reviewer_data[place_name] = []
-
-#         reviewer_data[place_name].append({
-#             "review": review_value["feedback"],
-#             "rating": f"{review_value['rating']} / 5",
-#             "reviewer": f"{reviewer_first_name} {reviewer_last_name}"
-#         })
-
-#     return jsonify(reviewer_data)
-
-
-@review_blueprint.route('/reviews', methods=["GET"])
+@review_api.route('/reviews', methods=["GET"])
 def reviews_get():
     """return all reviews"""
     reviewer_data = {}
@@ -71,10 +45,10 @@ def reviews_get():
     if not review_data:
         abort(404, "No Reviews available")
 
-    return jsonify(reviewer_data)
+    return jsonify(reviewer_data), 200
 
 
-@review_blueprint.route('/reviews/<place_id>', methods=['GET'])
+@review_api.route('/reviews/<place_id>', methods=['GET'])
 def reviews_specific_get(place_id):
     """returns specufued review of a place"""
 
@@ -100,10 +74,10 @@ def reviews_specific_get(place_id):
     if not review_data:
         abort(404, f"Review for {place_id} is not found")
 
-    return jsonify(reviewer_data)
+    return jsonify(reviewer_data), 200
 
 
-@review_blueprint.route('/reviews', methods=["POST"])
+@review_api.route('/reviews', methods=["POST"])
 def create_new_review():
     """create a new review"""
 
@@ -148,10 +122,10 @@ def create_new_review():
         "updated_at": datetime.fromtimestamp(new_review.updated_at)
     }
 
-    return jsonify(attribs), 201
+    return jsonify(attribs), 200
 
 
-@review_blueprint.route('/reviews/<place_id>', methods=["PUT"])
+@review_api.route('/reviews/<place_id>', methods=["PUT"])
 def update_review(place_id):
     """update review from a sepcific place id"""
     if not request.json:
@@ -181,10 +155,10 @@ def update_review(place_id):
         "updated_at": datetime.fromtimestamp(found_review_data["updated_at"])
     }
 
-    return jsonify(attribs), 201
+    return jsonify(attribs), 200
 
 
-@review_blueprint.route('/reviews/<place_id>', methods=["DELETE"])
+@review_api.route('/reviews/<place_id>', methods=["DELETE"])
 def delete_review(place_id):
     """delete a review of a place"""
 
@@ -205,4 +179,4 @@ def delete_review(place_id):
         "updated_at": datetime.fromtimestamp(delete_review_data["updated_at"])
     }
 
-    return jsonify(review_info), 201
+    return jsonify(review_info), 200

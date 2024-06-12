@@ -16,11 +16,11 @@ class Amenity():
         self.id = str(uuid.uuid4())
         self.created_at = datetime.now().timestamp()
         self.updated_at = self.created_at
-        self._name = None
-        self._number_of_rooms = None
-        self._bathrooms = None
-        self._price_per_night = None
-        self._max_guests = None
+        self.__name = None
+        self.__number_of_rooms = None
+        self.__bathrooms = None
+        self.__price_per_night = None
+        self.__max_guests = None
 
         if kwargs:
             for key, value in kwargs.items():
@@ -33,11 +33,11 @@ class Amenity():
     @property
     def name(self):
         """Getter for name of amenity"""
-        return self._name
+        return self.__name
 
     @name.setter
     def name(self, value):
-        self._name = value
+        self.__name = value
 
     @property
     def number_of_rooms(self):

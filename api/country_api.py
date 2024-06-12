@@ -17,17 +17,17 @@ from data import (
     place_to_amenity_data, review_data, user_data, city_data
 )
 
-country_blueprint = Blueprint('country_api', __name__)
+country_api = Blueprint('country_api', __name__)
 
 
 # Examples
-@country_blueprint.route('/example/country_data')
+@country_api.route('/example/country_data')
 def example_country_data():
     """ Example to show that we can view data loaded in the data module's init """
     return jsonify(country_data)
 
 
-@country_blueprint.route('/countries', methods=["GET"])
+@country_api.route('/countries', methods=["GET"])
 def countries_get():
     """ returns all countires data """
 
@@ -41,10 +41,10 @@ def countries_get():
             "updated_at": datetime.fromtimestamp(country_value["updated_at"])
         })
 
-    return jsonify(countries_info)
+    return jsonify(countries_info), 200
 
 
-@country_blueprint.route('/countries/<country_code>', methods=["GET"])
+@country_api.route('/countries/<country_code>', methods=["GET"])
 def countries_specific_get(country_code):
     """ returns specific country data """
 
@@ -60,10 +60,10 @@ def countries_specific_get(country_code):
         "updated_at": datetime.fromtimestamp(data['updated_at'])
     }
 
-    return jsonify(country_info)
+    return jsonify(country_info), 200
 
 
-@country_blueprint.route('/countries', methods=["POST"])
+@country_api.route('/countries', methods=["POST"])
 def create_new_country():
     """ posts data for new country then returns the country data"""
     # -- Usage example --
@@ -107,10 +107,10 @@ def create_new_country():
             "created_at": datetime.fromtimestamp(new_country.created_at),
             "updated_at": datetime.fromtimestamp(new_country.updated_at)
         }
-    return jsonify(attribs), 201
+    return jsonify(attribs), 200
 
 
-@country_blueprint.route('/countries/<country_code>', methods=["PUT"])
+@country_api.route('/countries/<country_code>', methods=["PUT"])
 def update_country(country_code):
     """ updates existing user data using specified id """
     # -- Usage example --
@@ -148,7 +148,7 @@ def update_country(country_code):
     return jsonify(attribs), 200
 
 
-@country_blueprint.route('/countries/<country_code>', methods=["DELETE"])
+@country_api.route('/countries/<country_code>', methods=["DELETE"])
 def delete_country(country_code):
     """Deletes an existing user by user_id"""
 

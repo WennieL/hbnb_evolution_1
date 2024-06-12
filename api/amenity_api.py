@@ -18,10 +18,10 @@ from data import (
 )
 
 
-amenity_blueprint = Blueprint('amenity_api', __name__)
+amenity_api = Blueprint('amenity_api', __name__)
 
 
-@amenity_blueprint.route('/amenities', methods=["GET"])
+@amenity_api.route('/amenities', methods=["GET"])
 def amenities_get():
     """return all amenities"""
     amenities_info = []
@@ -35,10 +35,10 @@ def amenities_get():
             "updated_at": datetime.fromtimestamp(amenity_value['updated_at'])
         })
 
-    return jsonify(amenities_info)
+    return jsonify(amenities_info), 200
 
 
-@amenity_blueprint.route('/amenities/<amenity_id>', methods=["GET"])
+@amenity_api.route('/amenities/<amenity_id>', methods=["GET"])
 def amenity_specific_get(amenity_id):
     """returns specified amenity"""
 
@@ -56,16 +56,12 @@ def amenity_specific_get(amenity_id):
         "updated_at": datetime.fromtimestamp(amenity_value['updated_at'])
     }
 
-    return jsonify(amenity_info)
+    return jsonify(amenity_info), 200
 
 
-@amenity_blueprint.route('/amenities', methods=["POST"])
+@amenity_api.route('/amenities', methods=["POST"])
 def create_new_amenity():
     """create a new amenity"""
-    # -- Usage example --
-    # curl -X POST [URL] /
-    #    -H "Content-Type: application/json" /
-    #    -d '{"key1":"value1","key2":"value2"}'
 
     if not request.json:
         abort(400, "Not a JSON")
@@ -98,16 +94,12 @@ def create_new_amenity():
         "created_at": datetime.fromtimestamp(new_amenity.created_at),
         "updated_at": datetime.fromtimestamp(new_amenity.updated_at)
     }
-    return jsonify(attribs), 201
+    return jsonify(attribs), 200
 
 
-@amenity_blueprint.route('/amenities/<amenity_id>', methods=["PUT"])
+@amenity_api.route('/amenities/<amenity_id>', methods=["PUT"])
 def update_amenity(amenity_id):
     """ updates existing amenity data using specified id """
-    # -- Usage example --
-    # curl -X PUT [URL] /
-    #    -H "Content-Type: application/json" /
-    #    -d '{"key1":"value1","key2":"value2"}'
 
     if not request.json:
         abort(400, "Request must contain JSON data")
@@ -136,9 +128,9 @@ def update_amenity(amenity_id):
     return jsonify(attribs), 200
 
 
-@amenity_blueprint.route('/amenities/<amenity_id>', methods=["DELETE"])
+@amenity_api.route('/amenities/<amenity_id>', methods=["DELETE"])
 def delete_amenity(amenity_id):
-    """Deletes an existing amenity by user_id"""
+    """Deletes an existing amenity by amenity_id"""
 
     for amenity_value in amenity_data.values():
         if amenity_value["id"] == amenity_id:

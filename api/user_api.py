@@ -18,18 +18,17 @@ from data import (
 )
 
 # Define the blueprint for user_api
-user_blueprint = Blueprint('user_api', __name__)
+user_api = Blueprint('user_api', __name__)
 
 
-@user_blueprint.route('/users', methods=["GET"])
+@user_api.route('/users', methods=["GET"])
 def users_get():
     """return all Users"""
     users_info = []
 
     for user_value in user_data.values():
-        user_id = user_value["id"]
         users_info.append({
-            "id": user_id,
+            "id": user_value["id"],
             "first_name": user_value['first_name'],
             "last_name": user_value['last_name'],
             "email": user_value['email'],
@@ -38,10 +37,10 @@ def users_get():
             "updated_at": datetime.fromtimestamp(user_value['updated_at'])
         })
 
-    return jsonify(users_info)
+    return jsonify(users_info), 200
 
 
-@user_blueprint.route('/users/<user_id>', methods=["GET"])
+@user_api.route('/users/<user_id>', methods=["GET"])
 def users_specific_get(user_id):
     """returns specified user"""
 
@@ -62,10 +61,10 @@ def users_specific_get(user_id):
         "updated_at": datetime.fromtimestamp(data['updated_at'])
     }
 
-    return jsonify(user_info)
+    return jsonify(user_info), 200
 
 
-@user_blueprint.route('/users', methods=["POST"])
+@user_api.route('/users', methods=["POST"])
 def create_new_user():
     """create a new user"""
     # -- Usage example --
@@ -118,10 +117,10 @@ def create_new_user():
         "created_at": datetime.fromtimestamp(new_user.created_at),
         "updated_at": datetime.fromtimestamp(new_user.updated_at)
     }
-    return jsonify(attribs), 201
+    return jsonify(attribs), 200
 
 
-@user_blueprint.route('/users/<user_id>', methods=["PUT"])
+@user_api.route('/users/<user_id>', methods=["PUT"])
 def update_user(user_id):
     """ updates existing user data using specified id """
     # -- Usage example --
@@ -167,7 +166,7 @@ def update_user(user_id):
     return jsonify(attribs), 200
 
 
-@user_blueprint.route('/users/<user_id>', methods=["DELETE"])
+@user_api.route('/users/<user_id>', methods=["DELETE"])
 def delete_user(user_id):
     """Deletes an existing user by user_id"""
 

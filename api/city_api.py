@@ -18,59 +18,104 @@ from data import (
 )
 
 
-city_blueprint = Blueprint('city_api', __name__)
+city_api = Blueprint('city_api', __name__, url_prefix="/api/v1")
 
 
-@city_blueprint.route('/cities')
+@city_api.route('/cities', methods=["GET"])
 def get_cities():
-    """ Example route to showing usage of the City model class """
+    """return all cities """
+    cities_info = []
 
-    # We will be appending dictionaries to the list instead of City objects
-    # This is so we can print them out on the webpage
-    # If there is no need to display the data, we can consider storing the City objects themselves
-    cities_list = []
+    for city_value in city_data.values():
+        cities_info.append({
+            "id": city_value["id"],
+            "country_id": city_value["country_id"],
+            "name": city_value["name"],
+            "created_at": datetime.fromtimestamp(city_value["created_at"]),
+            "updated_at": datetime.fromtimestamp(city_value["updated_at"])
+        })
 
-    # the 'hello' and 'world' params below will be filtered off in City constructor
-    cities_list.append(City(name="Gotham", hello="hello").__dict__)
-    cities_list.append(City(name="Metropolis", world="world").__dict__)
-
-    # Validation: The city with the invalid name is not appended to the list
-    try:
-        cities_list.append(City(name="#$%^&**", country_id=2).__dict__)
-    except ValueError as exc:
-        # This is printed internally in the server output. Not shown on website.
-        print("City creation Error - ", exc)
-
-    # Validation: The city with the invalid country_id is not appended to the list
-    try:
-        cities_list.append(City(name="Duckburg", country_id=1234).__dict__)
-    except ValueError as exc:
-        print("City creation Error - ", exc)
-
-    # Note that private attributes have a weird key format. e.g. "_City__country_id"
-    # This shows that the output of the City object's built-in __dict__ is not usable as-is
-
-    return cities_list
+    return jsonify(cities_info)
 
 
-@city_blueprint.route('/countries/<country_code>/cities', methods=["GET"])
+@city_api.route('/countries/<country_code>/cities', methods=["GET"])
 def countries_specific_cities_get(country_code):
-    """ returns cities data of specified country """
-    data = []
-    wanted_country_id = ""
+    """ returns all cities data of a specified country """
 
-    for k, v in country_data.items():
-        if v['code'] == country_code:
-            wanted_country_id = v['id']
+    cities_data = []
+    found_country_id = None
 
-    for k, v in city_data.items():
-        if v['country_id'] == wanted_country_id:
-            data.append({
-                "id": v['id'],
-                "name": v['name'],
-                "country_id": v['country_id'],
-                "created_at": datetime.fromtimestamp(v['created_at']),
-                "updated_at": datetime.fromtimestamp(v['updated_at'])
+    for country_value in country_data.values():
+        if country_value["code"] == country_code:
+            found_country_id = country_value["id"]
+            break
+
+    if not found_country_id:
+        abort(404, f"Country: {country_code} is not found")
+
+    for city_value in city_data.values():
+        if city_value["country_id"] == found_country_id:
+            cities_data.append({
+                "id": city_value["id"],
+                "country_id": city_value["country_id"],
+                "name": city_value["name"],
+                "created_at": datetime.fromtimestamp(city_value["created_at"]),
+                "updated_at": datetime.fromtimestamp(city_value["updated_at"])
             })
 
-    return jsonify(data)
+    return jsonify(cities_data), 200
+
+
+@city_api.route('/city/create', methods=["POST"])
+def create_new_city():
+    """create a new city to a specific country"""
+
+    if not request.json:
+        abort(400, "Not a JSON")
+
+    data = request.get_json()
+    required_fields = ["name", "country_id"]
+    for field in required_fields:
+        if field not in data:
+            abort(400, f"Missing data: {field}")
+
+    try:
+        new_city = City(
+            name=data["name"],
+            country_id=data["country_id"]
+        )
+    except ValueError as exc:
+        abort(400, repr(exc))
+
+    if "City" not in city_data:
+        city_data["City"] = []
+
+    city_data["City"].append({
+        "id": new_city.id,
+        "country_id": new_city.country_id,
+        "name": new_city.name,
+        "created_at": new_city.created_at,
+        "updated_at": new_city.updated_at
+    })
+
+    attribs = {
+        "id": new_city.id,
+        "country_id": new_city.country_id,
+        "name": new_city.name,
+        "created_at": datetime.fromtimestamp(new_city.created_at),
+        "updated_at": datetime.fromtimestamp(new_city.updated_at)
+    }
+
+    return jsonify(attribs), 200
+
+
+@city_api.route('/city/update/<city_id>', methods=["PUT"])
+def update_city_data():
+    """update data of a specific city"""
+    pass
+
+
+@city_api.route('/city/delete/<city_id>', methods=["DELETE"])
+def delete_a_city():
+    """delete a specific city"""
+    pass

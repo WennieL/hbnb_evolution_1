@@ -25,8 +25,7 @@ class City():
         # Note that setattr will call the setters for these 2 attribs
         if kwargs:
             for key, value in kwargs.items():
-                if hasattr(self, key):
-                    setattr(self, key, value)
+                setattr(self, key, value)
 
     @property
     def name(self):

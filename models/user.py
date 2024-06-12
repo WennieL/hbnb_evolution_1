@@ -16,10 +16,10 @@ class User():
         self.id = str(uuid.uuid4())
         self.created_at = datetime.now().timestamp()
         self.updated_at = self.created_at
-        self._first_name = ""
-        self._last_name = ""
-        self._email = ""
-        self._password = ""
+        self.__first_name = ""
+        self.__last_name = ""
+        self.__email = ""
+        self.__password = ""
 
         # Only allow first_name, last_name, email, password.
         # Note that setattr will call the setters for these attribs
@@ -31,7 +31,7 @@ class User():
     @property
     def first_name(self):
         """Getter for private prop first_name"""
-        return self._first_name
+        return self.__first_name
 
     @first_name.setter
     def first_name(self, value):
@@ -42,14 +42,14 @@ class User():
         is_valid_name = len(value.strip()) > 0 and re.search(
             "^[a-zA-Z]+$", value)
         if is_valid_name:
-            self._first_name = value
+            self.__first_name = value
         else:
             raise ValueError("Invalid first name specified: {}".format(value))
 
     @property
     def last_name(self):
         """Getter for private prop last_name"""
-        return self._last_name
+        return self.__last_name
 
     @last_name.setter
     def last_name(self, value):
@@ -60,14 +60,14 @@ class User():
         is_valid_name = len(value.strip()) > 0 and re.search(
             "^[a-zA-Z]+$", value)
         if is_valid_name:
-            self._last_name = value
+            self.__last_name = value
         else:
             raise ValueError("Invalid last name specified: {}".format(value))
 
     @property
     def email(self):
         """Getter for private prop email"""
-        return self._email
+        return self.__email
 
     @email.setter
     def email(self, value):
@@ -77,21 +77,21 @@ class User():
         is_valid_email = len(value.strip()) > 0 and re.search(
             "^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$", value)
         if is_valid_email:
-            self._email = value
+            self.__email = value
         else:
             raise ValueError("Invalid email specified: {}".format(value))
 
     @property
     def password(self):
         """Getter for private prop email"""
-        return self._password
+        return self.__password
 
     @password.setter
     def password(self, value):
         """Setter for private prop email"""
         is_valid_password = len(value) >= 6
         if is_valid_password:
-            self._password = value
+            self.__password = value
         else:
             raise ValueError(
                 "Password is too short! Min 6 characters required.")
