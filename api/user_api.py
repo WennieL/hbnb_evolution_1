@@ -149,8 +149,8 @@ def update_user(user_id):
     if "last_name" in new_data:
         found_user_data["last_name"] = new_data["last_name"]
 
-    # Update user_data with the modified found_user_data
-    user_data[user_id] = found_user_data
+    # # Update user_data with the modified found_user_data
+    # user_data[user_id] = found_user_data
 
     # Prepare response attributes with updated timestamps as datetime objects
     attribs = {

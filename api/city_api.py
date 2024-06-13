@@ -110,12 +110,49 @@ def create_new_city():
 
 
 @city_api.route('/city/update/<city_id>', methods=["PUT"])
-def update_city_data():
+def update_city_data(city_id):
     """update data of a specific city"""
-    pass
+    if not request.json:
+        abort(400, "not JSON file")
+
+    new_data = request.get_json()
+    for city_value in city_data.values():
+        if city_value["id"] == city_id:
+            found_city_data = city_value
+            break
+    else:
+        abort(404, "City ID not found: {city_id}")
+
+    if "name" in new_data:
+        found_city_data["name"] = new_data["name"]
+
+    attribs = {
+        "id": found_city_data["id"],
+        "country+id": found_city_data["country_id"],
+        "name": found_city_data["name"],
+        "created_at": datetime.fromtimestamp(found_city_data["created_at"]),
+        "updated_at": datetime.fromtimestamp(found_city_data["updated_at"])
+    }
+
+    return jsonify(attribs), 200
 
 
 @city_api.route('/city/delete/<city_id>', methods=["DELETE"])
-def delete_a_city():
+def delete_a_city(city_id):
     """delete a specific city"""
-    pass
+    for city_value in city_data.values():
+        if city_value["id"] == city_id:
+            delete_data = city_value
+            break
+    else:
+        abort(404, f"City not found: {city_id}")
+
+    city_info = {
+        "id": delete_data["id"],
+        "country+id": delete_data["country_id"],
+        "name": delete_data["name"],
+        "created_at": datetime.fromtimestamp(delete_data["created_at"]),
+        "updated_at": datetime.fromtimestamp(delete_data["updated_at"])
+    }
+
+    return jsonify(city_info), 200
