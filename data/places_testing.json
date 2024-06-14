@@ -1,0 +1,13 @@
+{
+    "address": "In the Melbourne CBD",
+    "bathrooms": 4,
+    "city_id": "687da7c4-eaba-411f-b00d-65c954eb2b8c",
+    "description": "A very convinent hotel",
+    "host_user_id": "0215a722-a3fc-4f08-9120-f8621147f2be",
+    "latitude": 255.814666,
+    "longitude":355.23062,
+    "max_guests": 2,
+    "name": "Grnad Hyett Hotel",
+    "number_of_rooms": 10,
+    "price_per_night": 25000.0
+}

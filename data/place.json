@@ -35,7 +35,7 @@
         {
             "id": "a1a3d915-68c8-4771-9bf4-498b9ae62463",
             "host_user_id": "0215a722-a3fc-4f08-9120-f8621147f2be",
-            "city": "687da7c4-eaba-411f-b00d-65c954eb2b8c",
+            "city_id": "687da7c4-eaba-411f-b00d-65c954eb2b8c",
             "name": "Box Hill Motel",
             "description": "Very expensive motel",
             "address": "Next to Box Hill bus terminal",

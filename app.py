@@ -28,6 +28,7 @@ from data import (
 # Initialize Flask app
 app = Flask(__name__)
 
+
 # Register blueprints - updated to unique prefixes
 app.register_blueprint(user_api, url_prefix='/api/v1')
 app.register_blueprint(country_api, url_prefix='/api/v1')
