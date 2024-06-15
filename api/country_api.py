@@ -152,20 +152,18 @@ def update_country(country_code):
 def delete_country(country_code):
     """Deletes an existing user by user_id"""
 
-    # Check if user_id exists in user_data
-    for country_value in country_data.values():
+    keys_to_delete = []
+
+    for country_key, country_value in list(country_data.items()):
         if country_value["code"] == country_code:
-            delete_data = country_value
-            break
-    else:
-        abort(404, f"Country not found: {country_code}")
+            keys_to_delete.append(country_key)
 
-    country_info = {
-        "id": delete_data["id"],
-        "code": delete_data["code"],
-        "name": delete_data["name"],
-        "created_at": datetime.fromtimestamp(delete_data["created_at"]),
-        "updated_at": datetime.fromtimestamp(delete_data["updated_at"])
-    }
+    if not keys_to_delete:
+        abort(404, f"Place not found with ID: {country_code}")
 
-    return jsonify(country_info), 200
+    # Remove the place(s) from the dictionary
+    for country_key in keys_to_delete:
+        del country_data[country_key]
+
+    # Return a confirmation message
+    return jsonify({"message": f"Country: {country_code} has been deleted."}), 204

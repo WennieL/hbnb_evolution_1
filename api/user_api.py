@@ -170,22 +170,16 @@ def update_user(user_id):
 def delete_user(user_id):
     """Deletes an existing user by user_id"""
 
-    # Check if user_id exists in user_data
-    for user_value in user_data.values():
+    keys_to_delete = []
+
+    for user_key, user_value in list(user_data.items()):
         if user_value["id"] == user_id:
-            delete_data = user_value
-            break
-    else:
-        abort(404, f"User not found: {user_id}")
+            keys_to_delete.append(user_key)
 
-    user_info = {
-        "id": delete_data["id"],
-        "first_name": delete_data["first_name"],
-        "last_name": delete_data["last_name"],
-        "email": delete_data["email"],
-        "password": delete_data["password"],
-        "created_at": datetime.fromtimestamp(delete_data["created_at"]),
-        "updated_at": datetime.fromtimestamp(delete_data["updated_at"])
-    }
+    if not keys_to_delete:
+        abort(404, f"User not found with ID: {user_id}")
 
-    return jsonify(user_info), 200
+    for user_key in keys_to_delete:
+        del user_data[user_key]
+
+    return jsonify({"message": f"User {user_id} has been deleted."})

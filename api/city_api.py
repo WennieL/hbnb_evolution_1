@@ -140,19 +140,19 @@ def update_city_data(city_id):
 @city_api.route('/city/delete/<city_id>', methods=["DELETE"])
 def delete_a_city(city_id):
     """delete a specific city"""
-    for city_value in city_data.values():
+
+    keys_to_delete = []
+
+    for city_key, city_value in list(placcity_data.items()):
         if city_value["id"] == city_id:
-            delete_data = city_value
-            break
-    else:
-        abort(404, f"City not found: {city_id}")
+            keys_to_delete.append(city_key)
 
-    city_info = {
-        "id": delete_data["id"],
-        "country+id": delete_data["country_id"],
-        "name": delete_data["name"],
-        "created_at": datetime.fromtimestamp(delete_data["created_at"]),
-        "updated_at": datetime.fromtimestamp(delete_data["updated_at"])
-    }
+    if not keys_to_delete:
+        abort(404, f"Place not found with ID: {city_id}")
 
-    return jsonify(city_info), 200
+    # Remove the place(s) from the dictionary
+    for city_key in keys_to_delete:
+        del city_data[city_key]
+
+    # Return a confirmation message
+    return jsonify({"message": f"Place {city_id} has been deleted."}), 204

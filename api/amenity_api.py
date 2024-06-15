@@ -132,18 +132,17 @@ def update_amenity(amenity_id):
 def delete_amenity(amenity_id):
     """Deletes an existing amenity by amenity_id"""
 
-    for amenity_value in amenity_data.values():
+    keys_to_delete = []
+
+    for amenity_key, amenity_value in list(amenity_data.items()):
         if amenity_value["id"] == amenity_id:
-            delete_data = amenity_value
-            break
-    else:
-        abort(404, f"Amenity not found: {amenity_id}")
+            keys_to_delete.append(amenity_key)
 
-    amenity_info = {
-        "id": delete_data["id"],
-        "name": delete_data["name"],
-        "created_at": datetime.fromtimestamp(delete_data["created_at"]),
-        "updated_at": datetime.fromtimestamp(delete_data["updated_at"])
-    }
+    if not keys_to_delete:
+        abort(404, f"Amenity not found with ID: {amenity_id}")
 
-    return jsonify(amenity_info), 200
+    for amenity_key in keys_to_delete:
+        del amenity_data[amenity_key]
+
+    # Return a confirmation message
+    return jsonify({"message": f"Amenity {amenity_id} has been deleted."}), 204

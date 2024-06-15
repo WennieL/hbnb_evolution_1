@@ -177,13 +177,86 @@ def create_place_info():
 @place_api.route('/places/<place_id>', methods=["PUT"])
 def update_place_info(place_id):
     """update info of a place"""
-    pass
+    if not request.json:
+        abort(400, "Not a JSON")
+
+    new_data = request.get_json()
+
+    for place_value in place_data.values():
+        if place_value["id"] == place_id:
+            found_place_data = place_value
+            break
+    else:
+        abort(404, f"Place ID not found: {place_id}")
+
+    # List of fields that can be updated
+    updated_fields = ["name", "description", "address", "latitude", "longitude",
+                      "number_of_rooms", "bathrooms", "price_per_night", "max_guests"]
+
+    # use for loop for updateing fields
+    for field in updated_fields:
+        if field in new_data:
+            found_place_data[field] = new_data[field]
+
+    # if "name" in new_data:
+    #     found_place_data["name"] = new_data["name"]
+    # if "description" in new_data:
+    #     found_place_data["description"] = new_data["description"]
+    # if "address" in new_data:
+    #     found_place_data["address"] = new_data["address"]
+    # if "latitude" in new_data:
+    #     found_place_data["latitude"] = new_data["latitude"]
+    # if "longitude" in new_data:
+    #     found_place_data["longitude"] = new_data["longitude"]
+    # if "number_of_rooms" in new_data:
+    #     found_place_data["number_of_rooms"] = new_data["number_of_rooms"]
+    # if "bathrooms" in new_data:
+    #     found_place_data["bathrooms"] = new_data["bathrooms"]
+    # if "price_per_night" in new_data:
+    #     found_place_data["price_per_night"] = new_data["price_per_night"]
+    # if "max_guests" in new_data:
+    #     found_place_data["max_guests"] = new_data["max_guests"]
+
+    attribs = {
+        "id": found_place_data["id"],
+        "host_user_id": found_place_data["host_user_id"],
+        "city_id": found_place_data["city_id"],
+        "name": found_place_data["name"],
+        "description": found_place_data["description"],
+        "address": found_place_data["address"],
+        "latitude": found_place_data["latitude"],
+        "longitude": found_place_data["longitude"],
+        "number_of_rooms": found_place_data["number_of_rooms"],
+        "bathrooms": found_place_data["bathrooms"],
+        "price_per_night": found_place_data["price_per_night"],
+        "max_guests": found_place_data["max_guests"],
+        "created_at": datetime.fromtimestamp(found_place_data["created_at"]),
+        "updated_at": datetime.fromtimestamp(found_place_data["updated_at"])
+    }
+
+    return jsonify(attribs), 200
 
 
-@place_api.route('/places/<place_id>', methods=["DELETE"])
+@ place_api.route('/places/<place_id>', methods=["DELETE"])
 def delete_place_info(place_id):
-    """dekete a place"""
-    pass
+    """delete a place"""
+
+    # Create a list of keys in place_data
+    keys_to_delete = []
+
+    for place_key, place_value in list(place_data.items()):
+        if place_value["id"] == place_id:
+            keys_to_delete.append(place_key)
+
+    if not keys_to_delete:
+        abort(404, f"Place not found with ID: {place_id}")
+
+    # Remove the place(s) from the dictionary
+    for place_key in keys_to_delete:
+        del place_data[place_key]
+
+    # Return a confirmation message
+    return jsonify({"message": f"Place {place_id} has been deleted."}), 204
 
 # @place_api.route('/place/<city_id>', methods=["GET"])
 # def places_in_a_specific_country(city_id):
