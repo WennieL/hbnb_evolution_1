@@ -4,6 +4,7 @@
 import json
 from pathlib import Path
 
+
 class FileStorage():
     """ Class for reading from files """
 
@@ -21,7 +22,8 @@ class FileStorage():
             for key in rows:
                 data[key] = rows[key]
         except ValueError as exc:
-            raise ValueError("Unable to load data from file '{}'".format(filename)) from exc
+            raise ValueError(
+                "Unable to load data from file '{}'".format(filename)) from exc
 
         # The data at this point is not directly usable. It needs to be cleaned up
         data = self.reorganise_model_data(data)
@@ -61,7 +63,8 @@ class FileStorage():
             for key in rows:
                 data[key] = rows[key]
         except ValueError as exc:
-            raise ValueError("Unable to load data from file '{}'".format(filename)) from exc
+            raise ValueError(
+                "Unable to load data from file '{}'".format(filename)) from exc
 
         # print(data.items())
 
@@ -76,3 +79,12 @@ class FileStorage():
                 grouped_data[place_id].append(amenity_id)
 
         return grouped_data
+
+    @staticmethod
+    def save_model_data(filename=None, data=None):
+        """save data"""
+        try:
+            with open(filename, 'w') as f:
+                json.dump(data, f)
+        except IOError as e:
+            raise Exception(f"Failed to save data: {str(e)}")

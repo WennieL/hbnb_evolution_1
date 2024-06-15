@@ -12,10 +12,14 @@ from models.city import City
 from models.amenity import Amenity
 
 # Import data
+from data import FileStorage
 from data import (
     country_data, place_data, amenity_data,
     place_to_amenity_data, review_data, user_data, city_data
 )
+
+# Import utility function
+from utils import pretty_json
 
 # Define the blueprint for user_api
 user_api = Blueprint('user_api', __name__)
@@ -33,11 +37,11 @@ def users_get():
             "last_name": user_value['last_name'],
             "email": user_value['email'],
             "password": user_value['password'],
-            "created_at": datetime.fromtimestamp(user_value['created_at']),
-            "updated_at": datetime.fromtimestamp(user_value['updated_at'])
+            "created_at": datetime.fromtimestamp(user_value['created_at']).isoformat(),
+            "updated_at": datetime.fromtimestamp(user_value['updated_at']).isoformat()
         })
 
-    return jsonify(users_info), 200
+    return pretty_json(users_info), 200
 
 
 @user_api.route('/users/<user_id>', methods=["GET"])
@@ -52,28 +56,24 @@ def users_specific_get(user_id):
         abort(404, f"User: {user_id} not found")
 
     user_info = {
-        "id": data['id'],
-        "first_name": data['first_name'],
-        "last_name": data['last_name'],
-        "email": data['email'],
-        "password": data['password'],
-        "created_at": datetime.fromtimestamp(data['created_at']),
-        "updated_at": datetime.fromtimestamp(data['updated_at'])
+        "id": data["id"],
+        "first_name": data["first_name"],
+        "last_name": data["last_name"],
+        "email": data["email"],
+        "password": data["password"],
+        "created_at": datetime.fromtimestamp(data["created_at"]).isoformat(),
+        "updated_at": datetime.fromtimestamp(data["updated_at"]).isoformat()
     }
 
-    return jsonify(user_info), 200
+    return pretty_json(user_info), 200
 
 
 @user_api.route('/users', methods=["POST"])
 def create_new_user():
     """create a new user"""
-    # -- Usage example --
-    # curl -X POST [URL] /
-    #    -H "Content-Type: application/json" /
-    #    -d '{"key1":"value1","key2":"value2"}'
 
     if not request.json:
-        abort(400, "Not a JSON")
+        abort(400, "Request must contain JSON data")
 
     # convert to python dict data type
     data = request.get_json()
@@ -94,39 +94,37 @@ def create_new_user():
     except ValueError as exc:
         abort(400, repr(exc))
 
-    # Ensure the "User" key exists and is a list
-    if "User" not in user_data:
-        user_data["User"] = []
-    # add new user data to user_data
-    # note that the created_at and updated_at are using timestamps
-    # data stored -> server side
-    user_data["User"].append({
+    user_data[new_user.id] = {
         "id": new_user.id,
         "first_name": new_user.first_name,
         "last_name": new_user.last_name,
         "email": new_user.email,
+        "password": new_user.password,
         "created_at": new_user.created_at,
         "updated_at": new_user.updated_at
-    })
-    # Prepare attributes to return, response to API request -> client side
+    }
+
+    try:
+        FileStorage.save_model_data("user_data.json", user_data)
+    except Exception as e:
+        abort(500, f"Failed to save data: {str(e)}")
+
     attribs = {
         "id": new_user.id,
         "first_name": new_user.first_name,
         "last_name": new_user.last_name,
         "email": new_user.email,
-        "created_at": datetime.fromtimestamp(new_user.created_at),
-        "updated_at": datetime.fromtimestamp(new_user.updated_at)
+        "created_at": datetime.fromtimestamp(new_user.created_at).isoformat(),
+        "updated_at": datetime.fromtimestamp(new_user.updated_at).isoformat()
     }
-    return jsonify(attribs), 200
+
+    # Use 201 Created status for successful creation
+    return pretty_json(attribs), 201
 
 
 @user_api.route('/users/<user_id>', methods=["PUT"])
 def update_user(user_id):
     """ updates existing user data using specified id """
-    # -- Usage example --
-    # curl -X PUT [URL] /
-    #    -H "Content-Type: application/json" /
-    #    -d '{"key1":"value1","key2":"value2"}'
 
     # Check if request contains JSON data
     if not request.json:
@@ -149,21 +147,22 @@ def update_user(user_id):
     if "last_name" in new_data:
         found_user_data["last_name"] = new_data["last_name"]
 
-    # # Update user_data with the modified found_user_data
-    # user_data[user_id] = found_user_data
+    try:
+        FileStorage.save_model_data("user_data.json", user_data)
+    except Exception as e:
+        abort(500, f"Failed to save data: {str(e)}")
 
-    # Prepare response attributes with updated timestamps as datetime objects
     attribs = {
         "id": found_user_data["id"],
         "first_name": found_user_data["first_name"],
         "last_name": found_user_data["last_name"],
         "email": found_user_data["email"],
-        "created_at": datetime.fromtimestamp(found_user_data["created_at"]),
-        "updated_at": datetime.fromtimestamp(found_user_data["updated_at"])
+        "created_at": datetime.fromtimestamp(found_user_data["created_at"]).isoformat(),
+        "updated_at": datetime.fromtimestamp(found_user_data["updated_at"]).isoformat()
     }
 
     # Return JSON response with updated user attributes
-    return jsonify(attribs), 200
+    return pretty_json(attribs), 200
 
 
 @user_api.route('/users/<user_id>', methods=["DELETE"])
@@ -182,4 +181,9 @@ def delete_user(user_id):
     for user_key in keys_to_delete:
         del user_data[user_key]
 
-    return jsonify({"message": f"User {user_id} has been deleted."})
+    try:
+        FileStorage.save_model_data("user_data.json", user_data)
+    except Exception as e:
+        abort(500, f"Failed to save data: {str(e)}")
+
+    return pretty_json({"message": f"User {user_id} has been deleted."}), 204

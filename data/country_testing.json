@@ -1,18 +1,11 @@
 {
-    "Country": [
-        {
-            "id": "5141c724-fded-4011-8cdb-0fb0ba4d2015",
-            "name": "Taiwan",
-            "code": "TW",
-            "created_at": 1715412135.350238,
-            "updated_at": 1715412135.350238
-        },
-        {
-            "id": "3b938719-c668-4872-b73e-5fc09b1f7c2b",
-            "name": "Japan",
-            "code": "JP",
-            "created_at": 1715412194.926692,
-            "updated_at": 1715412194.926692
-        }
-    ]
+    "id": "5141c724-fded-4011-8cdb-0fb0ba4d2015",
+    "name": "Taiwan",
+    "code": "TW",
+}
+
+{
+    "id": "3b938719-c668-4872-b73e-5fc09b1f7c2b",
+    "name": "Japan",
+    "code": "JP",
 }

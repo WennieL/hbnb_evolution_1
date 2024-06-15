@@ -12,10 +12,14 @@ from models.city import City
 from models.amenity import Amenity
 
 # Import data
+from data import FileStorage
 from data import (
     country_data, place_data, amenity_data,
     place_to_amenity_data, review_data, user_data, city_data
 )
+
+# Import utility function
+from utils import pretty_json
 
 
 place_api = Blueprint('place_api', __name__)
@@ -43,9 +47,7 @@ def places_amenties():
             amenity_name = amenity_data[amenity_key]['name']
             output[place_name].append(amenity_name)
 
-    return jsonify(output)
-
-# Q: how to make it unsorted?
+    return pretty_json(output)
 
 
 @place_api.route('/places', methods=["GET"])
@@ -68,11 +70,11 @@ def place_amenties():
             "bathrooms": place_value["bathrooms"],
             "price_per_night": place_value["price_per_night"],
             "max_guests": place_value["max_guests"],
-            "created_at": datetime.fromtimestamp(place_value["created_at"]),
-            "updated_at": datetime.fromtimestamp(place_value["updated_at"])
+            "created_at": datetime.fromtimestamp(place_value["created_at"]).isoformat(),
+            "updated_at": datetime.fromtimestamp(place_value["updated_at"]).isoformat()
         })
 
-    return jsonify(places_info), 200
+    return pretty_json(places_info), 200
 
 
 @place_api.route('/places/<place_id>', methods=["GET"])
@@ -98,18 +100,18 @@ def place_info(place_id):
         "bathrooms": found_place["bathrooms"],
         "price_per_night": found_place["price_per_night"],
         "max_guests": found_place["max_guests"],
-        "created_at": datetime.fromtimestamp(found_place["created_at"]),
-        "updated_at": datetime.fromtimestamp(found_place["updated_at"])
+        "created_at": datetime.fromtimestamp(found_place["created_at"]).isoformat(),
+        "updated_at": datetime.fromtimestamp(found_place["updated_at"]).isoformat()
     }
 
-    return jsonify(place_info), 200
+    return pretty_json(place_info), 200
 
 
 @place_api.route('/places', methods=["POST"])
 def create_place_info():
     """create a new place"""
     if not request.json:
-        abort(400, "Not a JSON")
+        abort(400, "Request must contain JSON data")
 
     data = request.get_json()
 
@@ -121,6 +123,8 @@ def create_place_info():
 
     try:
         new_place = Place(
+            host_user_id=data["host_user_id"],
+            city_id=data["city_id"],
             name=data["name"],
             description=data["description"],
             address=data["address"],
@@ -134,10 +138,7 @@ def create_place_info():
     except ValueError as exc:
         abort(400, repr(exc))
 
-    if "Place" not in place_data:
-        place_data["Place"] = []
-
-    place_data["Place"].append({
+    place_data[new_place.id] = {
         "id": new_place.id,
         "host_user_id": new_place.host_user_id,
         "city_id": new_place.city_id,
@@ -152,7 +153,12 @@ def create_place_info():
         "max_guests": new_place.max_guests,
         "created_at": new_place.created_at,
         "updated_at": new_place.updated_at
-    })
+    }
+
+    try:
+        FileStorage.save_model_data("place_data.json", place_data)
+    except Exception as e:
+        abort(500, f"Failed to save data: {str(e)}")
 
     attribs = {
         "id": new_place.id,
@@ -167,11 +173,11 @@ def create_place_info():
         "bathrooms": new_place.bathrooms,
         "price_per_night": new_place.price_per_night,
         "max_guests": new_place.max_guests,
-        "created_at": datetime.fromtimestamp(new_place.created_at),
-        "updated_at": datetime.fromtimestamp(new_place.updated_at)
+        "created_at": datetime.fromtimestamp(new_place.created_at).isoformat(),
+        "updated_at": datetime.fromtimestamp(new_place.updated_at).isoformat()
     }
 
-    return jsonify(attribs), 200
+    return pretty_json(attribs), 200
 
 
 @place_api.route('/places/<place_id>', methods=["PUT"])
@@ -198,24 +204,10 @@ def update_place_info(place_id):
         if field in new_data:
             found_place_data[field] = new_data[field]
 
-    # if "name" in new_data:
-    #     found_place_data["name"] = new_data["name"]
-    # if "description" in new_data:
-    #     found_place_data["description"] = new_data["description"]
-    # if "address" in new_data:
-    #     found_place_data["address"] = new_data["address"]
-    # if "latitude" in new_data:
-    #     found_place_data["latitude"] = new_data["latitude"]
-    # if "longitude" in new_data:
-    #     found_place_data["longitude"] = new_data["longitude"]
-    # if "number_of_rooms" in new_data:
-    #     found_place_data["number_of_rooms"] = new_data["number_of_rooms"]
-    # if "bathrooms" in new_data:
-    #     found_place_data["bathrooms"] = new_data["bathrooms"]
-    # if "price_per_night" in new_data:
-    #     found_place_data["price_per_night"] = new_data["price_per_night"]
-    # if "max_guests" in new_data:
-    #     found_place_data["max_guests"] = new_data["max_guests"]
+    try:
+        FileStorage.save_model_data("place_data.json", place_data)
+    except Exception as e:
+        abort(500, f"Failed to save data: {str(e)}")
 
     attribs = {
         "id": found_place_data["id"],
@@ -230,11 +222,11 @@ def update_place_info(place_id):
         "bathrooms": found_place_data["bathrooms"],
         "price_per_night": found_place_data["price_per_night"],
         "max_guests": found_place_data["max_guests"],
-        "created_at": datetime.fromtimestamp(found_place_data["created_at"]),
-        "updated_at": datetime.fromtimestamp(found_place_data["updated_at"])
+        "created_at": datetime.fromtimestamp(found_place_data["created_at"]).isoformat(),
+        "updated_at": datetime.fromtimestamp(found_place_data["updated_at"]).isoformat()
     }
 
-    return jsonify(attribs), 200
+    return pretty_json(attribs), 200
 
 
 @ place_api.route('/places/<place_id>', methods=["DELETE"])
@@ -255,27 +247,10 @@ def delete_place_info(place_id):
     for place_key in keys_to_delete:
         del place_data[place_key]
 
+    try:
+        FileStorage.save_model_data("place_data.json", place_data)
+    except Exception as e:
+        abort(500, f"Failed to save data: {str(e)}")
+
     # Return a confirmation message
-    return jsonify({"message": f"Place {place_id} has been deleted."}), 204
-
-# @place_api.route('/place/<city_id>', methods=["GET"])
-# def places_in_a_specific_country(city_id):
-#     """places within the countries"""
-#     pass
-
-
-# @place_api.route('/place/<host_user_id>', methods=["GET"])
-# def place_owned_by_user(host_user_id):
-#     """places are owned by which users"""
-
-
-# @place_api.route('/place/<place_id>', methods=["GET"])
-# def place_detail():
-#     """specific info of a place"""
-#     pass
-
-
-# @place_api.route('/place/<', methods=["GET"])
-# def
-# """names of the owners of places with toilets"""
-# pass
+    return pretty_json({"message": f"Place {place_id} has been deleted."}), 204

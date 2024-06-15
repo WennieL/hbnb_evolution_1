@@ -12,10 +12,14 @@ from models.city import City
 from models.amenity import Amenity
 
 # Import data
+from data import FileStorage
 from data import (
     country_data, place_data, amenity_data,
     place_to_amenity_data, review_data, user_data, city_data
 )
+
+# Import utility function
+from utils import pretty_json
 
 
 amenity_api = Blueprint('amenity_api', __name__)
@@ -31,11 +35,11 @@ def amenities_get():
         amenities_info.append({
             "id": amenity_id,
             "name": amenity_value['name'],
-            "created_at": datetime.fromtimestamp(amenity_value['created_at']),
-            "updated_at": datetime.fromtimestamp(amenity_value['updated_at'])
+            "created_at": datetime.fromtimestamp(amenity_value['created_at']).isoformat(),
+            "updated_at": datetime.fromtimestamp(amenity_value['updated_at']).isoformat()
         })
 
-    return jsonify(amenities_info), 200
+    return pretty_json(amenities_info), 200
 
 
 @amenity_api.route('/amenities/<amenity_id>', methods=["GET"])
@@ -52,11 +56,11 @@ def amenity_specific_get(amenity_id):
     amenity_info = {
         "id": amenity_id,
         "name": data['name'],
-        "created_at": datetime.fromtimestamp(amenity_value['created_at']),
-        "updated_at": datetime.fromtimestamp(amenity_value['updated_at'])
+        "created_at": datetime.fromtimestamp(amenity_value['created_at']).isoformat(),
+        "updated_at": datetime.fromtimestamp(amenity_value['updated_at']).isoformat()
     }
 
-    return jsonify(amenity_info), 200
+    return pretty_json(amenity_info), 200
 
 
 @amenity_api.route('/amenities', methods=["POST"])
@@ -78,23 +82,25 @@ def create_new_amenity():
     except ValueError as exc:
         abort(400, repr(exc))
 
-    if "Amenity" not in amenity_data:
-        amenity_data["Amenity"] = []
-
-    amenity_data["Amenity"].append({
+    amenity_data[new_amenity.id] = {
         "id": new_amenity.id,
         "name": new_amenity.name,
         "created_at": new_amenity.created_at,
         "updated_at": new_amenity.updated_at
-    })
+    }
+
+    try:
+        FileStorage.save_model_data("amenity_data.json", amenity_data)
+    except Exception as e:
+        abort(500, f"Failed to save date: {str(e)}")
 
     attribs = {
         "id": new_amenity.id,
         "name": new_amenity.name,
-        "created_at": datetime.fromtimestamp(new_amenity.created_at),
-        "updated_at": datetime.fromtimestamp(new_amenity.updated_at)
+        "created_at": datetime.fromtimestamp(new_amenity.created_at).isoformat(),
+        "updated_at": datetime.fromtimestamp(new_amenity.updated_at).isoformat()
     }
-    return jsonify(attribs), 200
+    return pretty_json(attribs), 200
 
 
 @amenity_api.route('/amenities/<amenity_id>', methods=["PUT"])
@@ -116,16 +122,19 @@ def update_amenity(amenity_id):
     if "name" in update_data:
         found_amenity_data["name"] = update_data["name"]
 
-    amenity_data[amenity_id] = found_amenity_data
+    try:
+        FileStorage.save_model_data("amenity_data.json", amenity_data)
+    except Exception as e:
+        abort(500, f"Failed to save date: {str(e)}")
 
     attribs = {
         "id": found_amenity_data["id"],
         "name": found_amenity_data["name"],
-        "created_at": datetime.fromtimestamp(found_amenity_data["created_at"]),
-        "updated_at": datetime.fromtimestamp(found_amenity_data["updated_at"])
+        "created_at": datetime.fromtimestamp(found_amenity_data["created_at"]).isoformat(),
+        "updated_at": datetime.fromtimestamp(found_amenity_data["updated_at"]).isoformat()
     }
 
-    return jsonify(attribs), 200
+    return pretty_json(attribs), 200
 
 
 @amenity_api.route('/amenities/<amenity_id>', methods=["DELETE"])
@@ -144,5 +153,10 @@ def delete_amenity(amenity_id):
     for amenity_key in keys_to_delete:
         del amenity_data[amenity_key]
 
+    try:
+        FileStorage.save_model_data("amenity_data.json", amenity_data)
+    except Exception as e:
+        abort(500, f"Failed to save date: {str(e)}")
+
     # Return a confirmation message
-    return jsonify({"message": f"Amenity {amenity_id} has been deleted."}), 204
+    return pretty_json({"message": f"Amenity {amenity_id} has been deleted."}), 204

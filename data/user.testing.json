@@ -1,9 +1,6 @@
 {
-    "id": "fb398757-cd28-4861-bbbe-fb233354f9b9",
     "first_name": "Lucy",
     "last_name": "Lee",
     "email": "lucylee@email.com",
-    "password": "abcdefg1234",
-    "created_at": 1718079088.942737,
-    "updated_at": 1718079088.942737
+    "password": "abcdefg1234"
 }

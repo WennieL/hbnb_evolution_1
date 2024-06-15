@@ -12,11 +12,14 @@ from models.city import City
 from models.amenity import Amenity
 
 # Import data
+from data import FileStorage
 from data import (
     country_data, place_data, amenity_data,
     place_to_amenity_data, review_data, user_data, city_data
 )
 
+# Import utility function
+from utils import pretty_json
 
 city_api = Blueprint('city_api', __name__, url_prefix="/api/v1")
 
@@ -31,49 +34,44 @@ def get_cities():
             "id": city_value["id"],
             "country_id": city_value["country_id"],
             "name": city_value["name"],
-            "created_at": datetime.fromtimestamp(city_value["created_at"]),
-            "updated_at": datetime.fromtimestamp(city_value["updated_at"])
+            "created_at": datetime.fromtimestamp(city_value["created_at"]).isoformat(),
+            "updated_at": datetime.fromtimestamp(city_value["updated_at"]).isoformat()
         })
 
-    return jsonify(cities_info)
+    return pretty_json(cities_info)
 
 
-@city_api.route('/countries/<country_code>/cities', methods=["GET"])
-def countries_specific_cities_get(country_code):
-    """ returns all cities data of a specified country """
-
-    cities_data = []
-    found_country_id = None
-
-    for country_value in country_data.values():
-        if country_value["code"] == country_code:
-            found_country_id = country_value["id"]
-            break
-
-    if not found_country_id:
-        abort(404, f"Country: {country_code} is not found")
+@city_api.route('/cities/<city_id>', methods=["GET"])
+def get_specific_city(city_id):
+    """get specific city"""
 
     for city_value in city_data.values():
-        if city_value["country_id"] == found_country_id:
-            cities_data.append({
-                "id": city_value["id"],
-                "country_id": city_value["country_id"],
-                "name": city_value["name"],
-                "created_at": datetime.fromtimestamp(city_value["created_at"]),
-                "updated_at": datetime.fromtimestamp(city_value["updated_at"])
-            })
+        if city_value["id"] == city_id:
+            data = city_value
+            break
+    else:
+        abort(404, f"User: {city_id} not found")
 
-    return jsonify(cities_data), 200
+    city_info = {
+        "id": data["id"],
+        "country_id": data["country_id"],
+        "name": data["name"],
+        "created_at": datetime.fromtimestamp(data["created_at"]).isoformat(),
+        "updated_at": datetime.fromtimestamp(data["updated_at"]).isoformat()
+    }
+
+    return pretty_json(city_info), 200
 
 
-@city_api.route('/city/create', methods=["POST"])
+@city_api.route('/cities', methods=["POST"])
 def create_new_city():
     """create a new city to a specific country"""
 
     if not request.json:
-        abort(400, "Not a JSON")
+        abort(400, "Request must contain JSON data")
 
     data = request.get_json()
+
     required_fields = ["name", "country_id"]
     for field in required_fields:
         if field not in data:
@@ -87,35 +85,38 @@ def create_new_city():
     except ValueError as exc:
         abort(400, repr(exc))
 
-    if "City" not in city_data:
-        city_data["City"] = []
-
-    city_data["City"].append({
+    city_data[new_city.id] = {
         "id": new_city.id,
         "country_id": new_city.country_id,
         "name": new_city.name,
         "created_at": new_city.created_at,
         "updated_at": new_city.updated_at
-    })
+    }
+
+    try:
+        FileStorage.save_model_data("city_data.json", city_data)
+    except Exception as e:
+        abort(500, f"Failed to save data: {str(e)}")
 
     attribs = {
         "id": new_city.id,
         "country_id": new_city.country_id,
         "name": new_city.name,
-        "created_at": datetime.fromtimestamp(new_city.created_at),
-        "updated_at": datetime.fromtimestamp(new_city.updated_at)
+        "created_at": datetime.fromtimestamp(new_city.created_at).isoformat(),
+        "updated_at": datetime.fromtimestamp(new_city.updated_at).isoformat()
     }
 
-    return jsonify(attribs), 200
+    return pretty_json(attribs), 200
 
 
-@city_api.route('/city/update/<city_id>', methods=["PUT"])
+@city_api.route('/cities/<city_id>', methods=["PUT"])
 def update_city_data(city_id):
     """update data of a specific city"""
     if not request.json:
-        abort(400, "not JSON file")
+        abort(400, "Request must contain JSON data")
 
     new_data = request.get_json()
+
     for city_value in city_data.values():
         if city_value["id"] == city_id:
             found_city_data = city_value
@@ -126,24 +127,29 @@ def update_city_data(city_id):
     if "name" in new_data:
         found_city_data["name"] = new_data["name"]
 
+    try:
+        FileStorage.save_model_data("city_data.json", city_data)
+    except Exception as e:
+        abort(500, f"Failed to save data: {str(e)}")
+
     attribs = {
         "id": found_city_data["id"],
         "country+id": found_city_data["country_id"],
         "name": found_city_data["name"],
-        "created_at": datetime.fromtimestamp(found_city_data["created_at"]),
-        "updated_at": datetime.fromtimestamp(found_city_data["updated_at"])
+        "created_at": datetime.fromtimestamp(found_city_data["created_at"]).isoformat(),
+        "updated_at": datetime.fromtimestamp(found_city_data["updated_at"]).isoformat()
     }
 
-    return jsonify(attribs), 200
+    return pretty_json(attribs), 200
 
 
-@city_api.route('/city/delete/<city_id>', methods=["DELETE"])
+@ city_api.route('/cities/<city_id>', methods=["DELETE"])
 def delete_a_city(city_id):
     """delete a specific city"""
 
     keys_to_delete = []
 
-    for city_key, city_value in list(placcity_data.items()):
+    for city_key, city_value in list(city_data.items()):
         if city_value["id"] == city_id:
             keys_to_delete.append(city_key)
 
@@ -154,5 +160,9 @@ def delete_a_city(city_id):
     for city_key in keys_to_delete:
         del city_data[city_key]
 
+    try:
+        FileStorage.save_model_data("city_data.json", city_data)
+    except Exception as e:
+        abort(500, f"Failed to save data: {str(e)}")
     # Return a confirmation message
-    return jsonify({"message": f"Place {city_id} has been deleted."}), 204
+    return pretty_json({"message": f"Place {city_id} has been deleted."}), 204
